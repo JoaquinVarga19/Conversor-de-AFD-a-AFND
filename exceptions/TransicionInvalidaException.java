@@ -1,5 +1,7 @@
 package exceptions;
 
-public class TransicionInvalidaException {
-    
+public class TransicionInvalidaException extends AutomataException {
+    public TransicionInvalidaException(String message) {
+        super(message);
+    }
 }
