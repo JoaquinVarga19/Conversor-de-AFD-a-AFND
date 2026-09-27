@@ -81,7 +81,25 @@ public class Validador {
     * longitud 0 (cadena vacía) hasta longitudMaxima inclusive.
     */
     private List<String> generarCadenas(Set<Character> alfabeto, int longitudMaxima) {
-        return null;
+
+        List<String> resultado = new ArrayList<>();
+        resultado.add(""); // Agregar la cadena vacía
+
+        List<String> nivelActual = new ArrayList<>();
+        nivelActual.add(""); // Comenzar con la cadena vacía
+
+        for (int longitud = 1; longitud <= longitudMaxima; longitud++) {
+            List<String> siguienteNivel = new ArrayList<>();
+            for (String prefijo : nivelActual) {
+                for (char simbolo : alfabeto) {
+                    String nueva = prefijo + simbolo;
+                    siguienteNivel.add(nueva);
+                    resultado.add(nueva);
+                }
+            }
+            nivelActual = siguienteNivel;
+        }
+        return resultado;
     }
 
     /*
@@ -97,7 +115,7 @@ public class Validador {
         reporte.append(nombreAntes).append(": ").append(estadoAntes).append(" estados\n");
         reporte.append(nombreDespues).append(": ").append(estadoDespues).append(" estados\n");
 
-        if (estadoAntes < estadoDespues) {
+        if (estadoDespues < estadoAntes) {
             reporte.append("Se redujo la cantidad de estados en ")
                 .append(estadoAntes - estadoDespues).append("\n");
         } else if (estadoDespues == estadoAntes) {
