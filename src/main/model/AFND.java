@@ -46,6 +46,7 @@ public class AFND extends Automata {
         
         Set<Estado> estadosActuales = new HashSet<>();
         estadosActuales.add(estadoInicial);
+        estadosActuales = clausuraEpsilon(estadosActuales);
 
         for (int i = 0; i < cadena.length(); i++) {
             char simbolo = cadena.charAt(i);
@@ -62,7 +63,7 @@ public class AFND extends Automata {
                 return false; // No hay transiciones posibles para el símbolo actual
             }
             
-            estadosActuales = siguienteNivel;
+            estadosActuales = clausuraEpsilon(siguienteNivel);
         }
 
         /*
