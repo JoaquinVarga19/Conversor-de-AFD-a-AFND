@@ -6,10 +6,6 @@ import model.Automata;
 import model.Estado;
 
 import exceptions.FormatoArchivoException;
-import model.AFD;
-import model.AFND;
-import model.Automata;
-import model.Estado;
  
 import java.io.IOException;
 import java.nio.file.Files;
