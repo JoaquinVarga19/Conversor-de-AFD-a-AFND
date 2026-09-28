@@ -1,0 +1,14 @@
+TIPO: AFD
+ALFABETO: 0,1
+ESTADOS: q2,q3,q0,q1
+INICIAL: q0
+FINALES: q2
+TRANSICIONES:
+q2,0,q3
+q2,1,q2
+q3,0,q1
+q3,1,q2
+q0,0,q1
+q1,0,q1
+q1,1,q2
+ 
