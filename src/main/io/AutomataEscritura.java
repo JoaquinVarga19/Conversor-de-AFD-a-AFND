@@ -76,9 +76,21 @@ public class AutomataEscritura {
     private void escribirTransicionesAFND(StringBuilder sb, AFND afnd) {
         for (Map.Entry<Estado, Map<Character, Set<Estado>>> entradaEstado : afnd.getTransiciones().entrySet()) {
             Estado origen = entradaEstado.getKey();
+
             for (Map.Entry<Character, Set<Estado>> entradaSimbolo : entradaEstado.getValue().entrySet()) {
                 sb.append(origen.getId()).append(",").append(entradaSimbolo.getKey());
                 for (Estado destino : entradaSimbolo.getValue()) {
+                    sb.append(",").append(destino.getId());
+                }
+                sb.append("\n");
+            }
+        }
+        
+        if (afnd.getTransicionesEpsilon() != null && !afnd.getTransicionesEpsilon().isEmpty()) {
+            sb.append("EPSILON:\n");
+            for (Map.Entry<Estado, Set<Estado>> entrada : afnd.getTransicionesEpsilon().entrySet()) {
+                sb.append(entrada.getKey().getId());            
+                for (Estado destino : entrada.getValue()) {
                     sb.append(",").append(destino.getId());
                 }
                 sb.append("\n");

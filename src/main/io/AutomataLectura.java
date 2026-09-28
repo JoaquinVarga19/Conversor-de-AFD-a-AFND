@@ -63,10 +63,10 @@ public class AutomataLectura {
             if (linea.isEmpty() || linea.startsWith("#")) {
                 continue; // Ignorar líneas vacías y comentarios
             }
-            if (linea.equalsIgnoreCase("TRANSICIONES: ")) {
+            if (linea.equalsIgnoreCase("TRANSICIONES:")) {
                 seccionActual = 1;
                 continue;
-            } else if (linea.equalsIgnoreCase("EPSILON: ")) {
+            } else if (linea.equalsIgnoreCase("EPSILON:")) {
                 seccionActual = 2;
                 continue;
             }

@@ -3,6 +3,8 @@ package model;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashSet;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 /*
 * Clase que representa un Autómata Finito No Determinista (AFND).
@@ -73,6 +75,33 @@ public class AFND extends Automata {
             }
         }
         return false;
+    }
+
+    /*
+    * Calcula la clausura epsilon de un conjunto de estados.
+    * La clausura epsilon de un conjunto de estados es el conjunto de todos los estados que se pueden alcanzar desde los estados del conjunto original mediante transiciones epsilon.
+    * @param conjunto El conjunto de estados del cual se calculará la clausura epsilon.
+    * @return Un conjunto que contiene todos los estados alcanzables desde el conjunto original mediante transiciones epsilon.
+    */
+    private Set<Estado> clausuraEpsilon(Set<Estado> conjunto) {
+        Set<Estado> clausura = new HashSet<>(conjunto);
+        if (transicionesEpsilon == null) {
+            return clausura;
+        }
+        Deque<Estado> pendientes = new ArrayDeque<>(conjunto);
+        while (!pendientes.isEmpty()) {
+            Estado actual = pendientes.pop();
+            Set<Estado> alcanzables = transicionesEpsilon.get(actual);
+            if (alcanzables != null) {
+                for (Estado estado : alcanzables) {
+                    if (!clausura.contains(estado)) {
+                        clausura.add(estado);
+                        pendientes.push(estado);
+                    }
+                }
+            }
+        }
+        return clausura;
     }
 
     /**
