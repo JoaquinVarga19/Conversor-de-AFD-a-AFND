@@ -10,7 +10,13 @@ import java.util.LinkedHashSet;
 import exceptions.FormatoArchivoException;
 import exceptions.TransicionInvalidaException;
 import model.Automata;
+import java.util.LinkedHashMap;
+import java.io.IOException;
+import java.nio.file.Files;
 import model.Estado;
+import model.AFD;
+import java.nio.file.Path;
+import model.AFND;
 
 /*
 * Clase encargada de leer un automata (AFD o AFND) desde un archivo de texto con el formato:
@@ -33,8 +39,110 @@ public class AutomataLectura {
      * @return El autómata creado a partir del archivo.
      */
     public Automata leerAutomata(String rutaArchivo) {
-        // Implementación de la lectura del archivo y creación del autómata
-        return null; // Retornar el autómata leído
+        List<String> lineas;
+        try {
+            lineas = Files.readAllLines(Path.of(rutaArchivo));
+        } catch (IOException e) {
+            throw new FormatoArchivoException("No se pudo leer el archivo: " + rutaArchivo + " (" + e.getMessage() + ")");
+        }
+
+        String tipo = null;
+        Set<Character> alfabeto = null;
+        Map<String, Estado> estadosPorId = new LinkedHashMap<>();
+        Set<Estado> estados = new LinkedHashSet<>();
+        Estado estadoInicial = null;
+        Set<Estado> finales = new LinkedHashSet<>();
+        
+        List<String> lineasTransiciones = new ArrayList<>();
+        List<String> lineasEpsilon = new ArrayList<>();
+
+        int seccionActual = 0; //0 = encabezado, 1 = transiciones, 2 = epsilon
+
+        for (String lineaOriginal : lineas) {
+            String linea = lineaOriginal.trim();
+            if (linea.isEmpty() || linea.startsWith("#")) {
+                continue; // Ignorar líneas vacías y comentarios
+            }
+            if (linea.equalsIgnoreCase("TRANSICIONES: ")) {
+                seccionActual = 1;
+                continue;
+            } else if (linea.equalsIgnoreCase("EPSILON: ")) {
+                seccionActual = 2;
+                continue;
+            }
+
+            if (seccionActual == 1) {
+                lineasTransiciones.add(linea);
+                continue;
+            }
+            if (seccionActual == 2) {
+                lineasEpsilon.add(linea);
+                continue;
+            }
+
+            int idx = linea.indexOf(':');
+            if (idx < 0) {
+                throw new FormatoArchivoException("Línea de encabezado inválida (falta ':'): " + linea);
+            }
+
+            String clave = linea.substring(0, idx).trim().toUpperCase();
+            String valor = linea.substring(idx + 1).trim();
+
+            switch (clave) {
+                case "TIPO":
+                    tipo = valor.toUpperCase();
+                    break;
+                case "ALFABETO":
+                    alfabeto = parsearSimbolos(valor);
+                    break;
+                case "ESTADOS":
+                    for (String id : dividir(valor)) {
+                        Estado nuevo = new Estado(id);
+                        estadosPorId.put(id, nuevo);
+                        estados.add(nuevo);
+                    }
+                    break;
+                case "INICIAL":
+                    estadoInicial = obtenerEstado(estadosPorId, valor);
+                    break;
+                case "FINALES":
+                    for (String id : dividir(valor)) {
+                        Estado estadoFinal = obtenerEstado(estadosPorId, id);
+                        estadoFinal.setEsAceptacion(true);
+                        finales.add(estadoFinal);
+                    }
+                    break;
+                default:
+                    throw new FormatoArchivoException("Clave de encabezado desconocida: " + clave);
+            }   
+        }
+
+        if (tipo == null) { 
+            throw new FormatoArchivoException("Falta el campo TIPO (AFD o AFND).");
+        }
+        if (alfabeto == null) {
+            throw new FormatoArchivoException("Falta el campo ALFABETO.");
+        }
+        if (estados.isEmpty()) {
+             throw new FormatoArchivoException("Falta el campo ESTADOS.");
+        }
+        if (estadoInicial == null) {
+             throw new FormatoArchivoException("Falta el campo INICIAL.");
+        }
+        
+        if (tipo.equals("AFD")) {
+            Map<Estado, Map<Character, Estado>> transiciones = parsearTransicionesAFD(lineasTransiciones, estadosPorId, alfabeto);
+            return new AFD(estados, alfabeto, estadoInicial, finales, transiciones);
+        } else if (tipo.equals("AFND")) {
+            Map<Estado, Map<Character, Set<Estado>>> transiciones = parsearTransicionesAFND(lineasTransiciones, estadosPorId, alfabeto);
+            AFND afnd = new AFND(estados, alfabeto, estadoInicial, finales, transiciones);
+            if (!lineasEpsilon.isEmpty()) {
+                afnd.setTransicionesEpsilon(parsearEpsilon(lineasEpsilon, estadosPorId));
+            }
+            return afnd;
+        } else {
+            throw new FormatoArchivoException("TIPO desconocido: " + tipo + " (se espera AFD o AFND).");
+        }
     }
 
     /*
