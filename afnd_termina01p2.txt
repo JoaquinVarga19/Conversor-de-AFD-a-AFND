@@ -1,0 +1,12 @@
+TIPO: AFND
+ALFABETO: a,b
+ESTADOS: qi,q0,q1,q2,q3
+INICIAL: qi
+FINALES: q3
+TRANSICIONES:
+q0,a,q0,q1
+q0,b,q0
+q1,b,q2
+q2,b,q3
+EPSILON:
+qi,q0
