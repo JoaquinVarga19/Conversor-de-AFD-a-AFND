@@ -4,11 +4,13 @@ import model.AFD;
 import model.AFND;
 import model.Estado;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.List;
 
 /*
 Convertir un AFND a un AFD por el metodo de subconjuntos.
@@ -100,7 +102,15 @@ public class Conversor {
         if (mapeoConjuntos.containsKey(conjunto)) {
             return mapeoConjuntos.get(conjunto);
         }
-        Estado nuevoEstado = new Estado("q" + contadorEstados++, contieneAceptacion(conjunto, afnd));
+
+        List ids = conjunto.stream()
+                .map(Estado::getId)
+                .sorted()
+                .collect(Collectors.toList());
+        
+        String nombreEstado = "{" + String.join(", ", ids) + "}";
+
+        Estado nuevoEstado = new Estado(nombreEstado, contieneAceptacion(conjunto, afnd));
         mapeoConjuntos.put(conjunto, nuevoEstado);
         return nuevoEstado;
     }
